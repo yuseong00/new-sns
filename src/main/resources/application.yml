@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    hikari.maximum-pool-size: 4
+    url: jdbc:mysql://localhost:3306/sns
+    username: sns
+    password: sns
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    defer-datasource-initialization: true
+    open-in-view: false
+    hibernate.ddl-auto: create
+    show-sql: true

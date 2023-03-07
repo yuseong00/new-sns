@@ -1,6 +1,6 @@
 package com.example.newsns.fixture;
 
-import com.fascampus.sns.model.entity.UserEntity;
+import com.example.newsns.model.entity.UserEntity;
 
 public class UserEntityFixture {
 
