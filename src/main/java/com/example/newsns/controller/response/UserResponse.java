@@ -6,14 +6,13 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UserJoinResponse {
-    //반환할 정보만 변수로 담는다.
+public
+class UserResponse {
     private Integer id;
-    private String  Name;
+    private String userName;
 
-
-    public static UserJoinResponse fromUser(UserDto user) {
-        return new UserJoinResponse(
+    public static UserResponse fromUser(UserDto user) {
+        return new UserResponse(
                 user.getId(),
                 user.getUsername()
         );

@@ -1,4 +1,4 @@
-package com.example.newsns.model.entity;
+package com.example.newsns.model;
 
 public enum UserRole {
 

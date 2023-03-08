@@ -4,7 +4,7 @@ import com.example.newsns.controller.request.UserJoinRequest;
 import com.example.newsns.controller.request.UserLoginRequest;
 import com.example.newsns.exception.ErrorCode;
 import com.example.newsns.exception.SnsApplicationException;
-import com.example.newsns.model.UserDTO;
+import com.example.newsns.model.UserDto;
 import com.example.newsns.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ public class UserControllerTest {
         String userName = "userName";
         String password = "password";
 
-        when(userService.join(userName, password)).thenReturn(mock(UserDTO.class));
+        when(userService.join(userName, password)).thenReturn(mock(UserDto.class));
 
         mockMvc.perform(post("/api/v1/users/join")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +89,7 @@ public class UserControllerTest {
         String userName = "userName";
         String password = "password";
 
-        when(userService.login(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, ""));
+        when(userService.login(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.USER_NOT_FOUND));
 
         mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -104,7 +104,7 @@ public class UserControllerTest {
         String userName = "userName";
         String password = "password";
 
-        when(userService.login(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, ""));
+        when(userService.login(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.INVALID_PASSWORD));
 
         mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)

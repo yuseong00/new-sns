@@ -1,5 +1,6 @@
 package com.example.newsns.service;
 
+import com.example.newsns.exception.ErrorCode;
 import com.example.newsns.exception.SnsApplicationException;
 import com.example.newsns.fixture.UserEntityFixture;
 import com.example.newsns.model.entity.UserEntity;
@@ -13,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -27,7 +29,7 @@ public class UserServiceTest {
     @MockBean
     private UserEntityRepository userEntityRepository;
     @MockBean
-    private BCryptPasswordEncoder encoder
+    private BCryptPasswordEncoder encoder;
 
 
 
@@ -40,7 +42,7 @@ public class UserServiceTest {
         when(encoder.encode(password)).thenReturn("encrypt_password");
 
         //save 를 하면 저장한 엔티티를 반환해야 하는데 UserEntity 타입으로 목킹하여 optional 로 반환한다.
-        when(userEntityRepository.save(any())).thenReturn(Optional.of(mock(UserEntity.class)));
+        when(userEntityRepository.save(any())).thenReturn(UserEntityFixture.get(userName,password));
 
         Assertions.assertDoesNotThrow(()->userService.join(userName,password));
 
@@ -61,8 +63,8 @@ public class UserServiceTest {
         when(userEntityRepository.save(any())).thenReturn(Optional.of(fixture));
 
         //가입내역이 있으면 에러처리는 진행한다.
-        assertThrows(SnsApplicationException.class,()->userService.join(userName,password));
-
+        SnsApplicationException e = assertThrows(SnsApplicationException.class, () -> userService.join(userName, password));
+        assertEquals(ErrorCode.DUPLICATED_USER_NAME,e.getErrorCode());
     }
 
 
@@ -71,11 +73,11 @@ public class UserServiceTest {
         String userName = "userName";
         String password=   "password";
 
-
+        //mocking
         //UserEntityFixture 에 가상의 회원가입 내역을 만든다.
         UserEntity fixture = UserEntityFixture.get(userName, password);
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(fixture));
-
+        when(encoder.matches(password, fixture.getPassword())).thenReturn(true);
         Assertions.assertDoesNotThrow(()->userService.login(userName,password));
 
     }
@@ -89,8 +91,8 @@ public class UserServiceTest {
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.empty());
 
         //가입내역이 있으면 에러처리는 진행한다.
-        assertThrows(SnsApplicationException.class,()->userService.login(userName,password));
-
+        SnsApplicationException e =assertThrows(SnsApplicationException.class,()->userService.login(userName,password));
+        assertEquals(ErrorCode.USER_NOT_FOUND,e.getErrorCode());
     }
 
 
@@ -106,8 +108,8 @@ public class UserServiceTest {
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(fixture));
 
         //가입내역이 있으면 에러처리는 진행한다.
-        assertThrows(SnsApplicationException.class,()->userService.login(userName,wrongPassword));
-
+        SnsApplicationException e =assertThrows(SnsApplicationException.class,()->userService.login(userName,wrongPassword));
+        assertEquals(ErrorCode.INVALID_PASSWORD,e.getErrorCode());
     }
 
 }

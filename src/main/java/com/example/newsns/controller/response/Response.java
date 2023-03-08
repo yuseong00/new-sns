@@ -13,7 +13,7 @@ public class Response<T>{
     public static  Response <Void> error(String errorCode){
         return new Response<>(errorCode, null);
     }
-    public static <T> Response <T> success(T result){
-        return new Response<>("SUCCESS", result);
+    public static <T> Response<T> success(T result) {
+        return new Response<T>("SUCCESS", result);
     }
 }

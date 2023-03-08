@@ -10,25 +10,31 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.Instant;
 
+
+@Table(name="post")
 @Getter
-@Table(name="user")
 @Setter
 @Entity
-@SQLDelete(sql = "UPDATE user SET removed_at = NOW() WHERE id=?")
+@SQLDelete(sql = "UPDATE post SET removed_at = NOW() WHERE id=?")
 @Where(clause = "removed_at is NULL") //삭제가 안된 애들만 가지고 와야한다.
-public class UserEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class PostEntity {
+
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "user_name")
-    private String userName;
+    @Column(name = "title")
+    private String title;
 
-    @Column(name = "password")
-    private String password;
+    @Column(name = "body",columnDefinition = "TEXT")
+    //Column 어노테이션은 필드에 칼럼 맾이정보를 설정할때 사용한다.
+    //columnDefinition 를 통해 body필드가 데이터베이스에서 TEXT 타입으로 매핑되도록 지정한다.
+    private String body;
 
-    @Column(name = "role")
-    @Enumerated(EnumType.STRING)
-    private UserRole role = UserRole.USER;   //유저의 권한 여부
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private UserEntity user;   //유저에 대한 정보가 필요하다. 게시글 작성시 누가 했는지 알아야 한다.
 
     @Column(name = "registered_at")
     private Timestamp registeredAt;//등록시간
@@ -49,13 +55,13 @@ public class UserEntity {
         this.updatedAt = Timestamp.from(Instant.now());
     }
 
-    //of 메서드는 UserEntity 객체를 생성하는데 사용하는 팩토리 메서드이다.
-    //of 메서드를 통해 userName, encodedPwd 정보를 담고 있는 새로운 UserEntity 객체를 담아 entity 생성
-    public static UserEntity of(String userName, String encodedPwd) {
-        UserEntity entity = new UserEntity();
-        entity.setUserName(userName);
-        entity.setPassword(encodedPwd);
+
+    //엔티티를 만들어주는 메서드이다.
+    public static PostEntity of(String title, String body, UserEntity userEntity) {
+        PostEntity entity = new PostEntity();
+        entity.setTitle(title);
+        entity.setBody(body);
+        entity.setUser(userEntity);
         return entity;
     }
-
 }
