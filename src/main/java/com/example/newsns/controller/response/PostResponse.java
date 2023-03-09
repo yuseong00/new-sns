@@ -27,7 +27,7 @@ public class PostResponse {
 
         private Timestamp removedAt;
 
-        public static PostResponse fromEntity(PostDto postDto) {
+        public static PostResponse fromPostDto(PostDto postDto) {
                 return new PostResponse(
                         postDto.getId(),
                         postDto.getTitle(),
