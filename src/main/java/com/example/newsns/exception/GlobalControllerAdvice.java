@@ -46,6 +46,6 @@ public class GlobalControllerAdvice {
     public ResponseEntity<?>applicationHandler(RuntimeException e){
         log.error("Error occurs{}",e.toString());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Response.error(ErrorCode.INTERVAL_SERVER_ERROR.name()));
+                .body(Response.error(ErrorCode.INVALID_PERMISSION.name()));
     }
 }

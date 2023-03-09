@@ -11,11 +11,11 @@ import java.util.Date;
 
 public class JwtTokenUtils {
 
-
+    //토큰값을 통해 고객식벽자 username 을 얻는 로직
     public static String getUserName(String token,String key){
        return extractAllClaims(token, key).get("userName", String.class);
     }
-
+   //토큰값을 통해 만료시간이 유효한지 확인하는 로직
     public static boolean isExpired(String token, String key){
         Date expiration = extractAllClaims(token, key).getExpiration();
         return expiration.before(new Date());

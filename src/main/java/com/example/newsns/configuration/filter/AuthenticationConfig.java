@@ -1,5 +1,6 @@
 package com.example.newsns.configuration.filter;
 
+import com.example.newsns.exception.CustomAuthenticationEntryPoint;
 import com.example.newsns.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,11 +36,17 @@ public class AuthenticationConfig {
              .sessionManagement()
              .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //session 적용은 안시킨다는 의미
              .and()
+             //exceptionHandling 안해도 되지만 내가 원하는 예외처리응답을 보내주기위해서 쓴다.
+             //인증이 실패한 경우에 처리할 AuthenticationEntryPoint 를 설정하는 메소드
+             //CustomAuthenticationEntryPoint는 사용자가 인증되지 않은 경우에 호출
+             .exceptionHandling() // 예외처리를 구성하는 메소드
+             .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
      //필터를 하나 설정을 해서 매번 들어올때마다 토큰이 어떤유저를 가르키는지 체크하는 로직을 짠다.
              //addFilterBefore 의 첫번쨰 인자는 추가하고자 하는 필터 객체, 두번째는 첫번째를 두번쨰 클래스 앞에서 추가하겠다는 의미
              //UsernamePasswordAuthenticationFilter 요청이 들어오면  JwtTokenFilter 를 먼저 해준다는 의미
              // JwtTokenFilter 를 통해 토큰 유효성검증 처리가 이뤄지고
              // UsernamePasswordAuthenticationFilter username, password 에 인증 권한 부여한다.
+             .and()
              .addFilterBefore(new JwtTokenFilter(userService,secretKey), UsernamePasswordAuthenticationFilter.class)
              .build();
 

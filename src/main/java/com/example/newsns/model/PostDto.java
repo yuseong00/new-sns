@@ -1,5 +1,6 @@
 package com.example.newsns.model;
 
+import com.example.newsns.controller.response.UserResponse;
 import com.example.newsns.model.entity.PostEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
