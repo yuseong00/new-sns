@@ -42,7 +42,7 @@ public class UserServiceTest {
         when(encoder.encode(password)).thenReturn("encrypt_password");
 
         //save 를 하면 저장한 엔티티를 반환해야 하는데 UserEntity 타입으로 목킹하여 optional 로 반환한다.
-        when(userEntityRepository.save(any())).thenReturn(UserEntityFixture.get(userName,password));
+        when(userEntityRepository.save(any())).thenReturn(UserEntityFixture.get(userName,password,1));
 
         Assertions.assertDoesNotThrow(()->userService.join(userName,password));
 
@@ -54,7 +54,7 @@ public class UserServiceTest {
         String password=   "password";
 
         //UserEntityFixture 에 가상의 회원가입 내역을 만든다.
-        UserEntity fixture = UserEntityFixture.get(userName, password);
+        UserEntity fixture = UserEntityFixture.get(userName, password,1);
 
         //회원가입시 userName 으로 찾았는데 가입내역이 있다.
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(fixture));
@@ -75,7 +75,7 @@ public class UserServiceTest {
 
         //mocking
         //UserEntityFixture 에 가상의 회원가입 내역을 만든다.
-        UserEntity fixture = UserEntityFixture.get(userName, password);
+        UserEntity fixture = UserEntityFixture.get(userName, password,1);
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(fixture));
         when(encoder.matches(password, fixture.getPassword())).thenReturn(true);
         Assertions.assertDoesNotThrow(()->userService.login(userName,password));
@@ -104,7 +104,7 @@ public class UserServiceTest {
 
 
         //UserEntityFixture 에 가상의 회원가입 내역을 만든다.
-        UserEntity fixture = UserEntityFixture.get(userName, password);
+        UserEntity fixture = UserEntityFixture.get(userName, password,1);
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(fixture));
 
         //가입내역이 있으면 에러처리는 진행한다.
