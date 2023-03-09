@@ -154,6 +154,10 @@ public class PostControllerTest {
     @Test
     @WithAnonymousUser
     void 포스트삭제시_작성자와_삭제요청자가_다를경우() throws Exception {
+
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).delete(any(),any());
+
+
         mockMvc.perform(delete("/api/v1/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
@@ -163,10 +167,13 @@ public class PostControllerTest {
     @Test
     @WithAnonymousUser
     void 포스트삭제시_삭제하려는_포스트가존재하지_않을경우() throws Exception {
+
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).delete(any(),any());
+
         mockMvc.perform(delete("/api/v1/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isNotFound());
     }
 
 

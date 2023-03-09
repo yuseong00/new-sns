@@ -37,4 +37,17 @@ public class PostController {
         return Response.success(PostResponse.fromEntity(postDto));
     }
 
+    @DeleteMapping("/{postId}")
+    //일단은 반환타입을 넘겨줘야 하니까 Response를 써야 한다. //Authentication 는 인증된 자의 회원 정보이다.
+    public Response<Void> delete(@PathVariable Integer postId, Authentication authentication) {
+
+        postService.delete(authentication.getName(), postId);
+
+        return Response.success();
+    }
+
+
+
+
+
 }
