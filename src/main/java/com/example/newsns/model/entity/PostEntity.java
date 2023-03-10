@@ -34,7 +34,10 @@ public class PostEntity {
 
     @ManyToOne
     @JoinColumn(name="user_id")
-    private UserEntity user;   //유저에 대한 정보가 필요하다. 게시글 작성시 누가 했는지 알아야 한다.
+    private UserEntity user;
+
+    //todo(todo의미없음) userentity클래스를 그대로 복사하였고 추가적으로 작성한건
+    // 유저에 대한 정보가 필요하다.게시글 작성시 누가 했는지 알아야 한다. 그리고 JPA 관계도 적는다.
 
     @Column(name = "registered_at")
     private Timestamp registeredAt;//등록시간

@@ -2,14 +2,18 @@ package com.example.newsns.service;
 
 import com.example.newsns.exception.ErrorCode;
 import com.example.newsns.exception.SnsApplicationException;
+import com.example.newsns.model.CommentDto;
 import com.example.newsns.model.PostDto;
+import com.example.newsns.model.entity.CommentEntity;
 import com.example.newsns.model.entity.LikeEntity;
 import com.example.newsns.model.entity.PostEntity;
 import com.example.newsns.model.entity.UserEntity;
+import com.example.newsns.repository.CommentEntityRepository;
 import com.example.newsns.repository.LikeEntityRepository;
 import com.example.newsns.repository.PostEntityRepository;
 import com.example.newsns.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,13 +28,32 @@ public class PostService {
     private final PostEntityRepository postEntityRepository;
     private final UserEntityRepository userEntityRepository;
     private final LikeEntityRepository likeEntityRepository;
+    private final CommentEntityRepository commentEntityRepository;
+
+    //getUserEntityOrException, getPostEntityOrException
+    //이 클래스 안에서만 쓸거라서 중복 제거를 위해 메소드를 만들었다. 에러 이름이 다를수 있으니 확인
+    private UserEntity getUserEntityOrException(String userName) {
+        return userEntityRepository
+                .findByUserName(userName).orElseThrow(() ->
+                        new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+
+    }
+
+    private PostEntity getPostEntityOrException(Integer postId) {
+        return postEntityRepository.findById(postId).orElseThrow(() ->
+                new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+
+    }
+
 
     @Transactional//포스트 작성하는 메서드
     public void create(String title, String body, String userName) {
-        //user find
-        UserEntity userEntity = userEntityRepository
-                .findByUserName(userName)
-                .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+        //1)유저의 정보가 있는지 유무 확인후 갖고온다.
+//        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() ->
+//                        new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+        UserEntity userEntity = getUserEntityOrException(userName);//리팩토링
+
+
         //post save
         PostEntity saved = postEntityRepository.save(PostEntity.of(title, body, userEntity));
 
@@ -43,12 +66,13 @@ public class PostService {
     @Transactional
     public PostDto modify(String title, String body, String userName, Integer postId) {
         //1)유저의 정보가 있는지 유무 확인후 갖고온다.
-        UserEntity userEntity = userEntityRepository
-                .findByUserName(userName).orElseThrow(() ->
-                        new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+//        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() ->
+//                        new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+        UserEntity userEntity = getUserEntityOrException(userName);//리팩토링
 
         //2)포스트의 정보가 있는지 유무 확인후 갖고온다.
-        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+//PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        PostEntity postEntity = getPostEntityOrException(postId); //리팩토링
 
         //3)게시글을 쓴 유저정보와 회원가입된 유저정보와 같은지 확인
         if (postEntity.getUser() != userEntity) {
@@ -66,11 +90,12 @@ public class PostService {
     @Transactional
     public void delete(String userName, Integer postId) {
         //1)유저의 정보가 있는지 유무 확인후 갖고온다.
-        UserEntity userEntity = userEntityRepository
-                .findByUserName(userName).orElseThrow(() ->
-                        new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+//        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() ->
+//                        new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+        UserEntity userEntity = getUserEntityOrException(userName);//리팩토링
         //2)포스트의 정보가 있는지 유무 확인후 갖고온다.
-        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+//PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        PostEntity postEntity = getPostEntityOrException(postId); //리팩토링
 
         //3)게시글을 쓴 유저정보와 회원가입된 유저정보와 같은지 확인
         if (postEntity.getUser() != userEntity) {
@@ -94,9 +119,9 @@ public class PostService {
 
     public Page<PostDto> my(String userName, Pageable pageable) {
         //1)유저의 정보가 있는지 유무 확인후 갖고온다.
-        UserEntity userEntity = userEntityRepository
-                .findByUserName(userName).orElseThrow(() ->
-                        new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+//        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() ->
+//                        new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+        UserEntity userEntity = getUserEntityOrException(userName);//리팩토링
 
         //2)유저가 작성한 리스트를 페이징해야한다~ findAllByUser 를 구현해줘야 한다.
         return postEntityRepository.findAllByUser(userEntity, pageable).map(PostDto::fromEntity);
@@ -107,24 +132,27 @@ public class PostService {
     public void like(Integer postId, String userName) {
 
         //1)유저의 정보가 있는지 유무 확인후 갖고온다.
-        UserEntity userEntity = userEntityRepository
-                .findByUserName(userName).orElseThrow(() ->
-                        new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+//        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() ->
+//                        new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+        UserEntity userEntity = getUserEntityOrException(userName);//리팩토링
+
 
         //2)포스트의 정보가 있는지 유무 확인후 갖고온다.
-        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+//PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        PostEntity postEntity = getPostEntityOrException(postId); //리팩토링
 
         //3)좋아요버튼을 한번만 누를수 있게한다. 그래서 눌렀는지데 대한 확인 유무처리를 해야한다.
         //1)LikeEntity 를 만든다. 2)LikeEntityRepository 를 만든다.
         //2) 만약 좋아요버튼을 누르면 postEntity의 postId에 유저정보가 포함되어있다. 그 유저정보의유무확인을 통해 에러처리진행
         likeEntityRepository.findByUserAndPost(userEntity, postEntity).ifPresent(it -> {
-            throw new SnsApplicationException(ErrorCode.ALREADY_LIKED_POST, String.format("%s username already like post %d", userName, postId));});
+            throw new SnsApplicationException(ErrorCode.ALREADY_LIKED_POST, String.format("%s username already like post %d", userName, postId));
+        });
 
 
         //4)유저정보 확인 유무 후 유저정보가 없으면 저장
         likeEntityRepository.save(LikeEntity.of(postEntity, userEntity));
 
-        }
+    }
 
 
     @Transactional
@@ -132,7 +160,8 @@ public class PostService {
 
 
         //1)포스트의 정보가 있는지 유무 확인후 갖고온다.
-        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        //PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        PostEntity postEntity = getPostEntityOrException(postId); //리팩토링
 
 //        //postEntity 의 정보를 갖고오되 LikeEntity 의 필드에 있는정보에 한해서 자료를 반환한다.
 //        List<LikeEntity> likeEntities = likeEntityRepository.findAllByPost(postEntity);
@@ -142,4 +171,34 @@ public class PostService {
         return likeEntityRepository.countByPost(postEntity);
 
     }
+
+    //식별자를 알기위해 postid  와 username이 필요하다.그걸 인자로 받아야 한다.
+    @Transactional
+    public void comment(Integer postId, String userName, String comment) {
+        //1)유저의 정보가 있는지 유무 확인후 갖고온다.
+//        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() ->
+//                        new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+        UserEntity userEntity = getUserEntityOrException(userName);//리팩토링
+
+        //2)포스트의 정보가 있는지 유무 확인후 갖고온다.
+//        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        PostEntity postEntity = getPostEntityOrException(postId); //리팩토링
+
+        //comment 서비스를 짜기위해 commentEntity ,commentEntityRepository 만든다.
+        commentEntityRepository.save(CommentEntity.of(postEntity, userEntity, comment));
+
+
     }
+    //반환값은 CommentDto 이다.
+    public Page<CommentDto>getComments(Integer postId, Pageable pageable){
+        PostEntity postEntity = getPostEntityOrException(postId);
+        return commentEntityRepository.findAllByPost(postEntity,pageable).map(CommentDto::fromEntity);
+        //findAllByPost 의 매서드는 postEntity로 부터 postId를 갖고와 그에 상승하는 CommentEntity를 페이징반환
+        //map를 통해 page(CommentEntity)에서  page(dto)로 변경하여 반환
+
+    }
+
+
+}
+
+
