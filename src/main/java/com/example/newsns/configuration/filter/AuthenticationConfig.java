@@ -7,16 +7,29 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @RequiredArgsConstructor
-public class AuthenticationConfig {
+@EnableWebSecurity
+public class AuthenticationConfig extends WebSecurityConfigurerAdapter {
 
     private final UserService userService;
 
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().regexMatchers("^(?!/api/).*");
+    }//^(?!/api/).*는 /api/로 시작하지 않는 모든 URL을 일치
+    //이 코드는 /aprrri/로 시작하지 않는 모든 요청에 대해 인증 및 권한 부여 필터를 적용하지 않도록 Spring Security를 구성
+    //HttpSecurity에 적용시킬수 있지만 따로 WebSecurity 성능최적화를 위해 따로 처리한다.
+    //HttpSecurity 구성은 인증, 인가, csrf 및 세션 관리와 같은 보안 설정을 처리하므로 더 복잡한 로직을 처리하기에 적합합니다.
+    // WebSecurity 구성은 간단한 정적 파일 또는 다른 경로의 미디어 파일과 같은 인증이 필요하지 않은 리소스를 처리하는 데 사용
     @Value("${jwt.secret-key}")  //다른 파일에 키값을 저장시켜놓는다.안정성,키 유출우려
     private String secretKey;
 
@@ -31,7 +44,7 @@ public class AuthenticationConfig {
      return http.csrf().disable()
              .authorizeHttpRequests()
              .antMatchers("/api/*/users/join","/api/*users/login").permitAll() //시큐리티 미적용
-             .antMatchers("/api/**").authenticated()
+             .antMatchers("/api/**").authenticated() //시큐리티 적용
              .and()
              .sessionManagement()
              .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //session 적용은 안시킨다는 의미
