@@ -1,6 +1,8 @@
 package com.example.newsns.controller;
 
+import com.example.newsns.controller.request.PostCommentRequest;
 import com.example.newsns.controller.request.PostCreateRequest;
+import com.example.newsns.controller.response.CommentResponse;
 import com.example.newsns.controller.response.PostResponse;
 import com.example.newsns.controller.response.Response;
 import com.example.newsns.model.PostDto;
@@ -49,7 +51,7 @@ public class PostController {
     }
 
     @GetMapping
-    //리스트 형태의 response는 반드시 페이징이 필요하다. 페이징 안하면 성능저하생긴다. 꼭 Pageable 해라~!
+    //리스트 형태의 response 는 반드시 페이징이 필요하다. 페이징 안하면 성능저하생긴다. 꼭 Pageable 해라~!
     //그리고 반환타입은 페이지형태로 보내야 한다.
     public Response<Page<PostResponse>> list(Pageable pageable , Authentication authentication){
 
@@ -63,7 +65,7 @@ public class PostController {
     }
 
 
-    @PostMapping("/{postId}/likes")
+    @PostMapping("/{postId}/likes") //@PathVariable Integer postId 여기에서 postId는 /{postId}/likes" 의 postId를 뜻한다.
     //좋아요버튼을 누르면 반환값이 없고, 카운팅만 되는 구현
     //로직을 짜기전에 입력값이 뭐가 있는지 확인한다. 일단 게시글번호,인증된 사용자가 필요하다)
     public Response<Void> like(@PathVariable Integer postId, Authentication authentication){
@@ -78,6 +80,25 @@ public class PostController {
 
         //success 의 반환타입은 제네릭으로 선언된 T이다. 따라서 likecount의 반환타입인 int로 결과값이 반환된다.
         return Response.success(postService.likeCount(postId));
+    }
+
+    @PostMapping("/{postId}/comments")
+    //@PathVariable Integer postId 여기에서 postId는 /{postId}/comments" 의 postId를 뜻한다.
+    // POST 메서드로 요청을 보낼 때 HTTP 본문에 담겨있는 JSON 데이터가
+    // PostCommentRequest 객체로 자동으로 변환되어 컨트롤러 메서드의 파라미터 request 로 전달
+    //PostCommentRequest 필드값에 따라 request 의 정보가 달라진다.
+    public Response<Void> comment(@PathVariable Integer postId, @RequestBody PostCommentRequest request, Authentication authentication){
+        postService.comment(postId, request.getComment(),authentication.getName());
+        return Response.success();
+    }
+
+
+    @GetMapping("/{postId}/comments") //페이징처리를 위해 Pageable 필요하다.
+    public Response<Page<CommentResponse>> getComment(@PathVariable Integer postId, Pageable pageable , Authentication authentication){
+
+        //getComments는 post엔티티의 postId와 관계되어있는 comment엔티티를 dto로 변환하여  페이징 처리한결과이고
+        //이를 다시 프론트엔드단으로 보내기 위해 dto를 response로 바꿔서 보내준다.
+        return Response.success(postService.getComments(postId,pageable).map(CommentResponse::fromCommentDto));
     }
 
 

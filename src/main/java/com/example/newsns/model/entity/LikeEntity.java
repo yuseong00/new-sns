@@ -37,8 +37,9 @@ public class LikeEntity {
 
     @ManyToOne
     @JoinColumn(name="post_id")  //단방향관계이다 !! 반대쪽은 설정하지 않는다.
-    private PostEntity post;  //어떤 게시글에 버튼을 눌렀는지 필요하다.
-
+    private PostEntity post;
+    //TODO(TODO의미없음) POST엔티티를 그대로 복사하되 수정진행하였으며
+    // 게시글에 대한 정보가 필요해서 POST를 추가작업 그리고 단방향관계 적음
     @Column(name = "registered_at")
     private Timestamp registeredAt;//등록시간
 
