@@ -33,7 +33,7 @@ public class AlarmEntity {
     private Integer id;
 
     //알람을 받는사람 !!
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id")
     private UserEntity user;   //유저에 대한 정보가 필요하다. 알람을 받는 사람이 누군지필요
 

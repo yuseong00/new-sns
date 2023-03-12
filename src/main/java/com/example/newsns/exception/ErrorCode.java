@@ -15,6 +15,7 @@ public enum ErrorCode {
     DUPLICATED_USER_NAME(HttpStatus.CONFLICT, "Duplicated user name"),
     ALREADY_LIKED_POST(HttpStatus.CONFLICT, "user already like the post"),
     INVALID_PERMISSION(HttpStatus.UNAUTHORIZED, "User has invalid permission"),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
     DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Database error occurs"),
     NOTIFICATION_CONNECT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Connect to notification occurs error"),
     ;

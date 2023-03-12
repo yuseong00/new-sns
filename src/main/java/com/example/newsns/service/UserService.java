@@ -76,15 +76,14 @@ public class UserService {
         return token ; //사용자 이름과 비밀번호를 검증하고 로그인 성공시 토큰을을 생성
     }
     //로그인한 유저 정보, 페이징처리할 정보
-    public Page<AlarmDto> alarmList(String userName, Pageable pageable) {
+//    public Page<AlarmDto> alarmList(String userName, Pageable pageable) {
         //1)유저가 실제 존재한지 확인해야 한다.
-        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(
-                () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("userName is %s", userName)));
-
+//        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("userName is %s", userName)));
         //2)알람레포에 유저정보가 있는지 확인한다(like와 같이)
-
         //그리고 게시글을 작성,좋아요버튼을 하는 서비스로직시 그떄 alarmEntityRepository 에 저장하는 로직을 추가구현
-        return alarmEntityRepository.findAllByUser(userEntity, pageable).map(AlarmDto::fromEntity);
-
+//        return alarmEntityRepository.findAllByUser(userEntity, pageable).map(AlarmDto::fromEntity);
+        public Page<AlarmDto> alarmList(Integer userId , Pageable pageable) {
+//       이건 필요없다. UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("userName is %s", userName)));
+        return alarmEntityRepository.findAllByUserId(userId, pageable).map(AlarmDto::fromEntity);
     }
 }

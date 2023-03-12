@@ -79,7 +79,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             // 자격 증명(credentials)은 주체(principal)가 제공한 암호화된 비밀번호나 인증 토큰 등을 나타냅니다
             //principal: (userDto) 인증 주체를 나타내는 객체 ,
             //credentials: 인증에 사용되는 자격 증명을 나타내는 객체,
-            //authorities: 주체(principal)가 가지고 있는 권한 정보를 나타내는 객체, List는 가변이지만 of를 통해 권한정보들을 불변 객체로 만들어줘 스레드 안정성 보장
+            //authorities: 주체(principal)가  가지고 있는 권한 정보를 나타내는 객체, List는 가변이지만 of를 통해 권한정보들을 불변 객체로 만들어줘 스레드 안정성 보장
             //3개의 객체가 필요하다. 인증주체에게 자격증명,권한정보를 부여한다.
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userDto, null, userDto.getAuthorities());
