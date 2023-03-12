@@ -2,16 +2,12 @@ package com.example.newsns.service;
 
 import com.example.newsns.exception.ErrorCode;
 import com.example.newsns.exception.SnsApplicationException;
+import com.example.newsns.model.AlarmArgs;
+import com.example.newsns.model.AlarmType;
 import com.example.newsns.model.CommentDto;
 import com.example.newsns.model.PostDto;
-import com.example.newsns.model.entity.CommentEntity;
-import com.example.newsns.model.entity.LikeEntity;
-import com.example.newsns.model.entity.PostEntity;
-import com.example.newsns.model.entity.UserEntity;
-import com.example.newsns.repository.CommentEntityRepository;
-import com.example.newsns.repository.LikeEntityRepository;
-import com.example.newsns.repository.PostEntityRepository;
-import com.example.newsns.repository.UserEntityRepository;
+import com.example.newsns.model.entity.*;
+import com.example.newsns.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
@@ -29,6 +25,7 @@ public class PostService {
     private final UserEntityRepository userEntityRepository;
     private final LikeEntityRepository likeEntityRepository;
     private final CommentEntityRepository commentEntityRepository;
+    private final AlarmEntityRepository alarmEntityRepository;
 
     //getUserEntityOrException, getPostEntityOrException
     //이 클래스 안에서만 쓸거라서 중복 제거를 위해 메소드를 만들었다. 에러 이름이 다를수 있으니 확인
@@ -152,6 +149,9 @@ public class PostService {
         //4)유저정보 확인 유무 후 유저정보가 없으면 저장
         likeEntityRepository.save(LikeEntity.of(postEntity, userEntity));
 
+        alarmEntityRepository.save(AlarmEntity.of(postEntity.getUser(), AlarmType.NEW_LIKE_ON_POST,new AlarmArgs(userEntity.getId(),postEntity.getId())));
+
+
     }
 
 
@@ -187,7 +187,7 @@ public class PostService {
         //comment 서비스를 짜기위해 commentEntity ,commentEntityRepository 만든다.
         commentEntityRepository.save(CommentEntity.of(postEntity, userEntity, comment));
 
-
+        alarmEntityRepository.save(AlarmEntity.of(postEntity.getUser(), AlarmType.NEW_COMMENT_ON_POST,new AlarmArgs(userEntity.getId(),postEntity.getId())));
     }
     //반환값은 CommentDto 이다.
     public Page<CommentDto>getComments(Integer postId, Pageable pageable){

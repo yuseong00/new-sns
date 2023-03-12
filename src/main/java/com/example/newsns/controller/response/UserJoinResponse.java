@@ -12,7 +12,7 @@ public class UserJoinResponse {
     private String  Name;
 
 
-    public static UserJoinResponse fromUser(UserDto user) {
+    public static UserJoinResponse fromUserDTO(UserDto user) {
         return new UserJoinResponse(
                 user.getId(),
                 user.getUsername()

@@ -32,7 +32,7 @@ public class PostResponse {
                         postDto.getId(),
                         postDto.getTitle(),
                         postDto.getBody(),
-                        UserResponse.fromUser(postDto.getUser()),
+                        UserResponse.fromUserDTO(postDto.getUser()),
                         postDto.getRegisteredAt(),
                         postDto.getUpdatedAt(),
                         postDto.getRemovedAt()

@@ -11,7 +11,7 @@ class UserResponse {
     private Integer id;
     private String userName;
 
-    public static UserResponse fromUser(UserDto user) {
+    public static UserResponse fromUserDTO(UserDto user) {
         return new UserResponse(
                 user.getId(),
                 user.getUsername()
