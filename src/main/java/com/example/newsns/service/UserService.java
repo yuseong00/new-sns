@@ -2,12 +2,16 @@ package com.example.newsns.service;
 
 import com.example.newsns.exception.ErrorCode;
 import com.example.newsns.exception.SnsApplicationException;
+import com.example.newsns.model.AlarmDto;
 import com.example.newsns.model.UserDto;
 import com.example.newsns.model.entity.UserEntity;
+import com.example.newsns.repository.AlarmEntityRepository;
 import com.example.newsns.repository.UserEntityRepository;
 import com.example.newsns.utill.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +22,7 @@ public class UserService {
 
 
     private final UserEntityRepository userEntityRepository;
+    private final AlarmEntityRepository alarmEntityRepository;
     public final BCryptPasswordEncoder encoder;
 
     @Value("${jwt.secret-key}")
@@ -69,5 +74,17 @@ public class UserService {
         //토큰 생성
         String token = JwtTokenUtils.generateToken(userName, secretKey, expiredTimeMs);
         return token ; //사용자 이름과 비밀번호를 검증하고 로그인 성공시 토큰을을 생성
+    }
+    //로그인한 유저 정보, 페이징처리할 정보
+    public Page<AlarmDto> alarmList(String userName, Pageable pageable) {
+        //1)유저가 실제 존재한지 확인해야 한다.
+        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(
+                () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("userName is %s", userName)));
+
+        //2)알람레포에 유저정보가 있는지 확인한다(like와 같이)
+
+        //그리고 게시글을 작성,좋아요버튼을 하는 서비스로직시 그떄 alarmEntityRepository 에 저장하는 로직을 추가구현
+        return alarmEntityRepository.findAllByUser(userEntity, pageable).map(AlarmDto::fromEntity);
+
     }
 }
