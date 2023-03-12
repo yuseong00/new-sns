@@ -6,6 +6,7 @@ import com.example.newsns.controller.response.CommentResponse;
 import com.example.newsns.controller.response.PostResponse;
 import com.example.newsns.controller.response.Response;
 import com.example.newsns.model.PostDto;
+import com.example.newsns.repository.LikeEntityRepository;
 import com.example.newsns.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
-
+    private final LikeEntityRepository likeEntityRepository;
 
 
     @PostMapping
@@ -37,6 +38,7 @@ public class PostController {
     public Response<PostResponse> modify(@PathVariable Integer postId, @RequestBody PostCreateRequest request, Authentication authentication) {
 
         PostDto postDto = postService.modify(request.getTitle(), request.getTitle(), authentication.getName(), postId);
+
 
         return Response.success(PostResponse.fromPostDto(postDto));
     }
@@ -76,7 +78,7 @@ public class PostController {
     @GetMapping("/{postId}/likes")
     //좋아요버튼을 누르면 반환값이 없고, 카운팅만 되는 구현
     //로직을 짜기전에 입력값이 뭐가 있는지 확인한다. 일단 게시글번호,인증된 사용자가 필요하다)
-    public Response<Integer> likeCount(@PathVariable Integer postId, Authentication authentication){
+    public Response<Long> likeCount(@PathVariable Integer postId, Authentication authentication){
 
         //success 의 반환타입은 제네릭으로 선언된 T이다. 따라서 likecount의 반환타입인 int로 결과값이 반환된다.
         return Response.success(postService.likeCount(postId));

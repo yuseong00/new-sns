@@ -99,6 +99,8 @@ public class PostService {
             throw new SnsApplicationException(ErrorCode.INVALID_PERMISSION, String.format("%s has nno permission with %s", userName, postId));
 
         }
+        likeEntityRepository.deleteAllByPost(postEntity);
+        commentEntityRepository.deleteAllByPost(postEntity);
         postEntityRepository.delete(postEntity);
     }
 
@@ -156,7 +158,7 @@ public class PostService {
 
 
     @Transactional
-    public int likeCount(Integer postId) {
+    public long likeCount(Integer postId) {
 
 
         //1)포스트의 정보가 있는지 유무 확인후 갖고온다.

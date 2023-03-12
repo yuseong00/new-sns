@@ -6,8 +6,11 @@ import com.example.newsns.controller.response.AlarmResponse;
 import com.example.newsns.controller.response.Response;
 import com.example.newsns.controller.response.UserJoinResponse;
 import com.example.newsns.controller.response.UserLoginResponse;
+import com.example.newsns.exception.ErrorCode;
+import com.example.newsns.exception.SnsApplicationException;
 import com.example.newsns.model.UserDto;
 import com.example.newsns.service.UserService;
+import com.example.newsns.utill.ClassUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,8 +50,12 @@ public class UserController {
         //2)이를 map으로 RESPONSE로 반환
 
         //알람받는 유저의 정보를 통해 alarmEntity 의 alarmType,args 등의 정보를 entity->dto->response 객체변환하고 page으로 결과값반환
-       return Response.success(userService.alarmList(authentication.getName(), pageable).map(AlarmResponse::fromAlarmDTO));
+//       return Response.success(userService.alarmList(authentication.getName(), pageable).map(AlarmResponse::fromAlarmDTO));
+//      (리팩토리전)  return Response.success(userService.alarmList(authentication.getName(), pageable).map(AlarmResponse::fromAlarmDTO));
 
+        UserDto userDto =  ClassUtils.getSafeCastInstance(authentication.getPrincipal(), UserDto.class).orElseThrow(()->new SnsApplicationException(ErrorCode.INTERNAL_SERVER_ERROR,
+                "casting to user class failed"));
+        return Response.success(userService.alarmList(userDto.getId(), pageable).map(AlarmResponse::fromAlarmDTO));
     }
 
 
