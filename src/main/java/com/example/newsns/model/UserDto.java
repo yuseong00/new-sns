@@ -21,7 +21,7 @@ import java.util.List;
 public class UserDto implements UserDetails { //USER DTO 이다
 
     private Integer id;
-    private String userName;
+    private String username;
     private String password;
     private UserRole userRole;
     private Timestamp registeredAt;
@@ -39,10 +39,10 @@ public class UserDto implements UserDetails { //USER DTO 이다
                 entity.getRemovedAt()
         );
     }
+
     //UserDetails 인터페이스는 시큐리티에서 인증 및 권한 부여를 위해 사용되는 인터페이스중 하나이다.
     //이 인터페이스를 구현함으로서 시큐링티에서 요구하는 사용자 정보를 제공할 수 있다.
     //UserDetails를 통해 사용자 정보드를 가져올 수 있다.
-
     //UserDetails 구현체
     @Override
     @JsonIgnore
@@ -50,11 +50,11 @@ public class UserDto implements UserDetails { //USER DTO 이다
         return List.of(new SimpleGrantedAuthority(userRole.toString()));
     }
 
-    @Override
-    public String getUsername() {
-        return this.userName;
-    }
-    //UserDetails 구현체
+//    @Override
+//    public String getUsername() {
+//        return this.username;
+//    }
+//    //UserDetails 구현체
     @Override
     @JsonIgnore
     public boolean isAccountNonExpired() {
@@ -79,3 +79,5 @@ public class UserDto implements UserDetails { //USER DTO 이다
         return removedAt == null;
     }
 }
+
+

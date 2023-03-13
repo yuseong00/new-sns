@@ -1,4 +1,4 @@
-package com.example.newsns.configuration.filter;
+package com.example.newsns.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
