@@ -6,12 +6,14 @@ import com.example.newsns.model.AlarmDto;
 import com.example.newsns.model.UserDto;
 import com.example.newsns.model.entity.UserEntity;
 import com.example.newsns.repository.AlarmEntityRepository;
+import com.example.newsns.repository.UserCacheRepository;
 import com.example.newsns.repository.UserEntityRepository;
 import com.example.newsns.utill.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ public class UserService {
     private final UserEntityRepository userEntityRepository;
     private final AlarmEntityRepository alarmEntityRepository;
     public final BCryptPasswordEncoder encoder;
+    public final UserCacheRepository redisRepository;
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -35,9 +38,16 @@ public class UserService {
 
 
     //원래는 extends해서 userDetailService 를 통해 사용자 인증정보를 갖고올수 있지만 커스텀마이징을 위해 따로 만듬.
-    public UserDto loadUserByUserName(String userName){
-        return userEntityRepository.findByUserName(userName).map(UserDto::fromEntity).orElseThrow(()->
-                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+//    public UserDto loadUserByUserName(String userName){
+//        return userEntityRepository.findByUserName(userName).map(UserDto::fromEntity).orElseThrow(()->
+//                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+//    }(리팩토링 하기전)
+
+    public UserDto loadUserByUserName(String userName) throws UsernameNotFoundException { //redis 적용
+        return redisRepository.getUser(userName).orElseGet(
+                () -> userEntityRepository.findByUserName(userName).map(UserDto::fromEntity).orElseThrow(
+                        () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("userName is %s", userName))
+                ));
     }
 
 
@@ -60,14 +70,17 @@ public class UserService {
     //로그인을 완료하였을 때 jwt 토큰으로 반환을 해야 하기에 String 으로 반환처리 해야 한다.
     public String login(String userName,String password){
         //회원가입이 안되어있으면 에러를 반환
-        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(
-                () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("userName is %s", userName)));
+//        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(
+//(redis 적용전)        () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("userName is %s", userName)));
+
+        UserDto userDto = loadUserByUserName(userName);
+        redisRepository.setUser(userDto);
 
 //       //비밀번호 맞는지 체크  (등록된 패스워드와 입력된 패스워드가 다른경우) //암호화된 패스워드가 아니다. 다시 체크해야한다.
 //       if(!userEntity.getPassword().equals(password)){throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,"");}
-
        //암호화된 패스워드로 매칭한다.
-        if (!encoder.matches(password, userEntity.getPassword())) {
+
+        if (!encoder.matches(password, userDto.getPassword())) {
             throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
 

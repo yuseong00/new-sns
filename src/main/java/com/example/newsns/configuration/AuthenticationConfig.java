@@ -1,5 +1,6 @@
-package com.example.newsns.configuration.filter;
+package com.example.newsns.configuration;
 
+import com.example.newsns.configuration.filter.JwtTokenFilter;
 import com.example.newsns.exception.CustomAuthenticationEntryPoint;
 import com.example.newsns.service.UserService;
 import lombok.RequiredArgsConstructor;
